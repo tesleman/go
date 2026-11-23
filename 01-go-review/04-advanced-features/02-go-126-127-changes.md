@@ -4,6 +4,48 @@
 
 ---
 
+## Go 1.25 (серпень 2025) — що вже змінилося
+
+### 1. `sync.WaitGroup.Go()` — більше не треба `Add`/`Done` вручну
+`go
+// Було (Go 1.24 і раніше):
+var wg sync.WaitGroup
+for _, url := range urls {
+    wg.Add(1)
+    go func(u string) {
+        defer wg.Done()
+        fetch(u)
+    }(url)
+}
+wg.Wait()
+
+// Стало (Go 1.25):
+var wg sync.WaitGroup
+for _, url := range urls {
+    wg.Go(func() { fetch(url) })  // сам Add(1) + defer Done()
+}
+wg.Wait()
+`
+> **Аналогія з JS:** було `let p = fetch(); promises.push(p)`, тепер пул сам рахує. Неможливо забути `Add` (гонка) чи `Done` (дедлок).
+
+### 2. `testing/synctest` — детермінований тест часу і горутин
+`go
+func TestWorker(t *testing.T) {
+    synctest.Test(t, func(t *testing.T) {
+        ch := make(chan int)
+        go func() { time.Sleep(time.Second); ch <- 42 }()
+        if got := <-ch; got != 42 { t.Fatal(got) }  // без реального очікування
+    })
+}
+`
+> **Аналогія з Jest:** `jest.useFakeTimers()`, але вбудовано.
+
+### 3. `t.Context()` — контекст, що скасовується після тесту
+### 4. `os.Root` — обмежений доступ до ФС (захист від `../../etc/passwd`)
+
+---
+
+
 ## Go 1.26 (лютий 2026)
 
 ### 1. `new(expr)` — тепер приймає вираз, не лише тип
