@@ -48,14 +48,25 @@ type Greeter interface {
 }
 
 type EnglishSpeaker struct{}
+type SpanlishSpeaker struct{}
+
 
 // Метод автоматично задовольняє Greeter — не треба писати "implements"
 func (e EnglishSpeaker) Greet() string {
     return "Hello!"
 }
 
+func (e SpanlishSpeaker) Greet() string {
+    return "Hola!"
+}
+
 func PrintGreeting(g Greeter) {
     fmt.Println(g.Greet())
+}
+
+func main() {
+    PrintGreeting(EnglishSpeaker{})   // Hello!
+    PrintGreeting(SpanlishSpeaker{})  // Hola!
 }
 ```
 
